@@ -10,6 +10,7 @@ type AxthUser struct {
 	UserID           string
 	DisplayName      string
 	Email            string
+	Phone            string
 	Password         string
 	Status           string
 	LoginFailedCount int

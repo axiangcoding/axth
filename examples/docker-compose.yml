@@ -1,0 +1,16 @@
+version: "3"
+services:
+  db:
+    image: mariadb:10
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+      MYSQL_USER: axth
+      MYSQL_PASSWORD: pwd
+      MYSQL_DATABASE: axth
+    ports:
+      - "3306:3306"
+  redis:
+    image: redis:6-alpine
+    ports:
+      - "6379:6379"

@@ -7,22 +7,21 @@ on:
     branches: [ master ]
 
 jobs:
-  test:
+  test-job:
     runs-on: ubuntu-latest
     services:
       mariadb:
         image: mariadb:latest
-        ports:
-          - 3306:3306
         env:
           MYSQL_ROOT_PASSWORD: example
           MYSQL_USER: axth
           MYSQL_PASSWORD: pwd
           MYSQL_DATABASE: axth
         options: --health-cmd="mysqladmin ping" --health-interval=5s --health-timeout=2s --health-retries=3
+
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set up Go
         uses: actions/setup-go@v2

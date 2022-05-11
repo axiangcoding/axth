@@ -11,4 +11,4 @@ check:
 	go vet ./
 
 test:
-	go test ./
+	go test ./...

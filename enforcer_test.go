@@ -1,6 +1,8 @@
 package axth
 
 import (
+	"github.com/axiangcoding/axth/data/schema"
+	"os"
 	"testing"
 )
 
@@ -9,21 +11,55 @@ var conf = Config{
 	CacheDsn: "redis://localhost:6379/0",
 }
 
-func TestEnforcer_NewEnforcer(t *testing.T) {
-	_, err := NewEnforcer(&conf)
+var e *Enforcer
+
+// setup 初始化
+func setup() {
+	enforcer, err := NewEnforcer(&conf)
 	if err != nil {
-		t.Fatal("init a new enforcer failed")
+		panic(err)
 	}
+	e = enforcer
 }
 
-func TestEnforcer_Login(t *testing.T) {
-	e, _ := NewEnforcer(&conf)
-	err := e.Login("userA", "pwdA")
+// teardown 退出清理
+func teardown() {
+
+}
+
+func TestMain(m *testing.M) {
+	setup()
+	code := m.Run()
+	teardown()
+	os.Exit(code)
+}
+
+func TestEnforcer_Register(t *testing.T) {
+	register, err := e.Register(schema.RegisterUser{
+		UserID:      "test-user-1",
+		DisplayName: "test-user-1",
+		Email:       "test-user-1@test.com",
+		Phone:       "+8600000000001",
+		Password:    "abc",
+	})
 	if err != nil {
+		t.Error(err)
+	}
+	if !register {
 		t.Fail()
 	}
 }
 
-func TestEnforcer_Logout(t *testing.T) {
+func TestEnforcer_Login(t *testing.T) {
+	_, err := e.LoginWithEmail("test-user-1@test.com", "abc")
+	if err != nil {
+		t.Error(err)
+	}
+}
 
+func TestEnforcer_ResetPassword(t *testing.T) {
+	_, err := e.ResetPassword("test-user-1", "abc", "newPwd")
+	if err != nil {
+		t.Error(err)
+	}
 }

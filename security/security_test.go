@@ -1,6 +1,9 @@
 package security
 
-import "testing"
+import (
+	"strconv"
+	"testing"
+)
 
 var examples = []struct {
 	plainPwd string
@@ -15,27 +18,23 @@ var examples = []struct {
 }
 
 func TestGeneratePwd(t *testing.T) {
-	for _, example := range examples {
-		caseName := "case '" + example.plainPwd + "'"
-		t.Run(caseName, func(t *testing.T) {
+	for i, example := range examples {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			_, err := GeneratePwd(example.plainPwd)
 			if err != nil {
 				t.Error(err)
 			}
-		},
-		)
+		})
 	}
 }
 
 func TestComparePwd(t *testing.T) {
-	for _, example := range examples {
-		caseName := "case '" + example.plainPwd + "'"
-		t.Run(caseName, func(t *testing.T) {
+	for i, example := range examples {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			err := ComparePwd(example.hashPwd, example.plainPwd)
 			if err != nil {
 				t.Error(err)
 			}
-		},
-		)
+		})
 	}
 }

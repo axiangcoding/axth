@@ -7,7 +7,7 @@ import (
 
 const (
 	AxUserStatusNormal = "normal"
-	// UserStatusBanned 封禁状态
+	// AxUserStatusBanned 封禁状态
 	AxUserStatusBanned = "banned"
 )
 

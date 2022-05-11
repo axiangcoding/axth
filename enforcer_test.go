@@ -7,7 +7,7 @@ import (
 )
 
 var conf = Config{
-	DBDsn:    "axth:pwd@tcp(127.0.0.1:3306)/axth?charset=utf8mb4&parseTime=True&loc=Local",
+	DBDsn:    "axth:pwd@tcp(mariadb:3306)/axth?charset=utf8mb4&parseTime=True&loc=Local",
 	CacheDsn: "redis://localhost:6379/0",
 }
 

@@ -12,6 +12,8 @@ jobs:
     services:
       mariadb:
         image: mariadb:latest
+        ports:
+          - 3306:3306
         env:
           MYSQL_ROOT_PASSWORD: example
           MYSQL_USER: axth

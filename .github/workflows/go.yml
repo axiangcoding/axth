@@ -13,7 +13,7 @@ jobs:
       mariadb:
         image: mariadb:latest
         ports:
-          - 3306
+          - 3306:3306
         env:
           MYSQL_ROOT_PASSWORD: example
           MYSQL_USER: axth
@@ -29,13 +29,13 @@ jobs:
         with:
           go-version: 1.18
 
-      - name: Verify MariaDB connection
-        env:
-          PORT: ${{ job.services.mariadb.ports[3306] }}
-        run: |
-          while ! mysqladmin ping -h"127.0.0.1" -P"$PORT"; do
-            sleep 1
-          done  
+#      - name: Verify MariaDB connection
+#        env:
+#          PORT: ${{ job.services.mariadb.ports[3306] }}
+#        run: |
+#          while ! mysqladmin ping -h"127.0.0.1" -P"$PORT"; do
+#            sleep 1
+#          done
 
       - name: Test
         run: go test -v ./...

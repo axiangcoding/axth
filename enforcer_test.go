@@ -63,3 +63,11 @@ func TestEnforcer_ResetPassword(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestEnforcer_FindUser(t *testing.T) {
+	user, err := e.FindUser("test-user-1")
+	if err != nil {
+		t.Error(err)
+	}
+	t.Log(user)
+}

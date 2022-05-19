@@ -10,7 +10,7 @@ type IEnforcer interface {
 	LoginWithPhone(phone string, password string) (*schema.DisplayUser, error)
 	ResetPassword(userID string, oldPwd string, newPwd string) (bool, error)
 	Register(ru schema.RegisterUser) (bool, error)
-	FindUser(userId string) (schema.DisplayUser, error)
+	FindUser(userId string) (*schema.DisplayUser, error)
 	CheckUserIdExist(userId string) (bool, error)
 	CheckEmailExist(email string) (bool, error)
 	CheckPhoneExist(phone string) (bool, error)

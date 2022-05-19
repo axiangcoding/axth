@@ -12,10 +12,10 @@ import (
 )
 
 const (
-	loginFieldId     = "id"
-	loginFieldEmail  = "email"
-	loginFieldPhone  = "phone"
-	loginFieldUserId = "userId"
+	loginFieldId = "id"
+	FieldEmail   = "email"
+	FieldPhone   = "phone"
+	FieldUserId  = "userId"
 )
 
 type Enforcer struct {
@@ -60,17 +60,17 @@ func NewEnforcer(config *Config) (*Enforcer, error) {
 
 // Login 使用用户ID登录，默认登录方式
 func (e *Enforcer) Login(userID string, password string) (*schema.DisplayUser, error) {
-	return e.loginWithKey(loginFieldUserId, userID, password)
+	return e.loginWithKey(FieldUserId, userID, password)
 }
 
 // LoginWithEmail 使用邮箱登录
 func (e *Enforcer) LoginWithEmail(email string, password string) (*schema.DisplayUser, error) {
-	return e.loginWithKey(loginFieldEmail, email, password)
+	return e.loginWithKey(FieldEmail, email, password)
 }
 
 // LoginWithPhone 使用手机号登录
 func (e *Enforcer) LoginWithPhone(phone string, password string) (*schema.DisplayUser, error) {
-	return e.loginWithKey(loginFieldPhone, phone, password)
+	return e.loginWithKey(FieldPhone, phone, password)
 }
 
 // ResetPassword 重置密码
@@ -106,7 +106,7 @@ func (e *Enforcer) Register(ru schema.RegisterUser) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	user.Password = string(hashedPassword)
+	user.Password = hashedPassword
 	err = e.Db.Save(user).Error
 	if err != nil {
 		return false, err
@@ -115,39 +115,40 @@ func (e *Enforcer) Register(ru schema.RegisterUser) (bool, error) {
 }
 
 // FindUser 查找一个用户
-func (e *Enforcer) FindUser(userID string) (schema.DisplayUser, error) {
-	// TODO implement me
-	panic("implement me")
+func (e *Enforcer) FindUser(userID string) (*schema.DisplayUser, error) {
+	where := schema.AxthUser{UserID: userID}
+	var found schema.AxthUser
+	err := e.Db.Where(where).Take(&found).Error
+	if err != nil {
+		return nil, err
+	}
+	return found.ToDisplayUser(), nil
 }
 
 // CheckUserIdExist 检查用户ID是否存在
 func (e *Enforcer) CheckUserIdExist(userId string) (bool, error) {
-	// TODO implement me
-	panic("implement me")
+	return e.checkValueExist(FieldUserId, userId)
 }
 
 // CheckEmailExist 检查邮箱是否存在
 func (e *Enforcer) CheckEmailExist(email string) (bool, error) {
-	// TODO implement me
-	panic("implement me")
+	return e.checkValueExist(FieldEmail, email)
 }
 
 // CheckPhoneExist 检查手机号是否存在
 func (e *Enforcer) CheckPhoneExist(phone string) (bool, error) {
-	// TODO implement me
-	panic("implement me")
+	return e.checkValueExist(FieldPhone, phone)
 }
 
 func (e *Enforcer) loginWithKey(key string, val interface{}, password string) (*schema.DisplayUser, error) {
 	where := schema.AxthUser{}
-	if key == loginFieldEmail {
+	if key == FieldEmail {
 		where.Email = val.(string)
-	} else if key == loginFieldUserId {
+	} else if key == FieldUserId {
 		where.UserID = val.(string)
-	} else if key == loginFieldPhone {
+	} else if key == FieldPhone {
 		where.Phone = val.(string)
 	} else {
-
 		return nil, errs.ErrInternalFailed
 	}
 	var found schema.AxthUser
@@ -160,4 +161,23 @@ func (e *Enforcer) loginWithKey(key string, val interface{}, password string) (*
 		return nil, errs.ErrUserPasswordNotMatched
 	}
 	return found.ToDisplayUser(), nil
+}
+
+func (e *Enforcer) checkValueExist(key string, val interface{}) (bool, error) {
+	where := schema.AxthUser{}
+	if key == FieldEmail {
+		where.Email = val.(string)
+	} else if key == FieldUserId {
+		where.UserID = val.(string)
+	} else if key == FieldPhone {
+		where.Phone = val.(string)
+	} else {
+		return false, errs.ErrInternalFailed
+	}
+	var count int64
+	err := e.Db.Where(where).Count(&count).Error
+	if err != nil {
+		return false, err
+	}
+	return count >= 1, nil
 }

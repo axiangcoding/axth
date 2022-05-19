@@ -1,4 +1,4 @@
-name: Go
+name: Build
 
 on:
   push:
@@ -32,3 +32,4 @@ jobs:
 
       - name: Test Axth
         run: go test -v ./...
+    # build-job: 打标签

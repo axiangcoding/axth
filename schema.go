@@ -11,6 +11,13 @@ const (
 	AxUserStatusBanned = "banned"
 )
 
+const (
+	FieldId     = "id"
+	FieldEmail  = "email"
+	FieldPhone  = "phone"
+	FieldUserId = "userId"
+)
+
 // AxthUser For user save in database
 type AxthUser struct {
 	gorm.Model

@@ -9,15 +9,8 @@ import (
 	"time"
 )
 
-const (
-	loginFieldId = "id"
-	FieldEmail   = "email"
-	FieldPhone   = "phone"
-	FieldUserId  = "userId"
-)
-
 type Enforcer struct {
-	Db *gorm.DB
+	db *gorm.DB
 	// CacheDb *redis.Client
 }
 
@@ -52,7 +45,7 @@ func NewEnforcer(config *Config) (*Enforcer, error) {
 	// }
 	// redisClient := redis.NewClient(opt)
 	return &Enforcer{
-		Db: db,
+		db: db,
 		// CacheDb: redisClient,
 	}, nil
 }
@@ -78,7 +71,7 @@ func (e *Enforcer) ResetPassword(userID string, oldPwd string, newPwd string) (b
 		UserID: userID,
 	}
 	var found AxthUser
-	err := e.Db.Where(where).Take(&found).Error
+	err := e.db.Where(where).Take(&found).Error
 	if err != nil {
 		return false, err
 	}
@@ -91,7 +84,7 @@ func (e *Enforcer) ResetPassword(userID string, oldPwd string, newPwd string) (b
 	if err != nil {
 		return false, err
 	}
-	err = e.Db.Model(&found).Updates(AxthUser{Password: newHashPwd}).Error
+	err = e.db.Model(&found).Updates(AxthUser{Password: newHashPwd}).Error
 	if err != nil {
 		return false, err
 	}
@@ -106,7 +99,7 @@ func (e *Enforcer) Register(ru RegisterUser) (bool, error) {
 		return false, err
 	}
 	user.Password = hashedPassword
-	err = e.Db.Save(user).Error
+	err = e.db.Save(user).Error
 	if err != nil {
 		return false, err
 	}
@@ -117,7 +110,7 @@ func (e *Enforcer) Register(ru RegisterUser) (bool, error) {
 func (e *Enforcer) FindUser(userID string) (*DisplayUser, error) {
 	where := AxthUser{UserID: userID}
 	var found AxthUser
-	err := e.Db.Where(where).Take(&found).Error
+	err := e.db.Where(where).Take(&found).Error
 	if err != nil {
 		return nil, err
 	}
@@ -151,7 +144,7 @@ func (e *Enforcer) loginWithKey(key string, val interface{}, password string) (*
 		return nil, errs.ErrInternalFailed
 	}
 	var found AxthUser
-	err := e.Db.Where(where).Take(&found).Error
+	err := e.db.Where(where).Take(&found).Error
 	if err != nil {
 		return nil, errs.ErrUserNotExist
 	}
@@ -174,7 +167,7 @@ func (e *Enforcer) checkValueExist(key string, val interface{}) (bool, error) {
 		return false, errs.ErrInternalFailed
 	}
 	var count int64
-	err := e.Db.Model(&where).Where(where).Count(&count).Error
+	err := e.db.Model(&where).Where(where).Count(&count).Error
 	if err != nil {
 		return false, err
 	}

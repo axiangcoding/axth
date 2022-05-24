@@ -35,7 +35,8 @@ func NewEnforcer(config *Config) (*Enforcer, error) {
 	if err != nil {
 		return nil, err
 	}
-	err = db.AutoMigrate(&schema.AxthUser{})
+	err = db.Set("gorm:table_options",
+		"ENGINE=InnoDB CHARSET=utf8mb4 COLLATE utf8mb4_bin").AutoMigrate(&schema.AxthUser{})
 	if err != nil {
 		return nil, err
 	}
@@ -174,7 +175,7 @@ func (e *Enforcer) checkValueExist(key string, val interface{}) (bool, error) {
 		return false, errs.ErrInternalFailed
 	}
 	var count int64
-	err := e.Db.Where(where).Count(&count).Error
+	err := e.Db.Model(&where).Where(where).Count(&count).Error
 	if err != nil {
 		return false, err
 	}

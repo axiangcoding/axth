@@ -42,25 +42,25 @@ func (r AxthUser) ToDisplayUser() *DisplayUser {
 
 // DisplayUser For user display
 type DisplayUser struct {
-	ID               uint
-	UserID           string
-	DisplayName      string
-	Email            string
-	Phone            string
-	Status           string
-	LoginFailedCount int
-	CreatedAt        time.Time
-	UpdatedAt        time.Time
-	LastLoginTime    time.Time
+	ID               uint      `json:"id,omitempty"`
+	UserID           string    `json:"user_id,omitempty"`
+	DisplayName      string    `json:"display_name,omitempty"`
+	Email            string    `json:"email,omitempty"`
+	Phone            string    `json:"phone,omitempty"`
+	Status           string    `json:"status,omitempty"`
+	LoginFailedCount int       `json:"login_failed_count,omitempty"`
+	CreatedAt        time.Time `json:"created_at"`
+	UpdatedAt        time.Time `json:"updated_at"`
+	LastLoginTime    time.Time `json:"last_login_time"`
 }
 
 // RegisterUser For user register
 type RegisterUser struct {
-	UserID      string
-	DisplayName string
-	Email       string
-	Phone       string
-	Password    string
+	UserID      string `json:"user_id,omitempty"`
+	DisplayName string `json:"display_name,omitempty"`
+	Email       string `json:"email,omitempty"`
+	Phone       string `json:"phone,omitempty"`
+	Password    string `json:"password,omitempty"`
 }
 
 func (u RegisterUser) ToAxUser() *AxthUser {

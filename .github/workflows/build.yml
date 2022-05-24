@@ -30,6 +30,6 @@ jobs:
         with:
           go-version: 1.18
 
-      - name: Test Axth
+      - name: Test all testcase
         run: go test -v ./...
     # build-job: 打标签

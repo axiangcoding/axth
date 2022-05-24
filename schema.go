@@ -1,4 +1,4 @@
-package schema
+package axth
 
 import (
 	"gorm.io/gorm"
@@ -61,7 +61,6 @@ type RegisterUser struct {
 	Email       string
 	Phone       string
 	Password    string
-	EncodedPwd  string
 }
 
 func (u RegisterUser) ToAxUser() *AxthUser {

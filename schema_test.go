@@ -1,4 +1,4 @@
-package schema
+package axth
 
 import (
 	"github.com/stretchr/testify/assert"

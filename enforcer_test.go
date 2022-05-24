@@ -1,7 +1,6 @@
 package axth
 
 import (
-	"github.com/axiangcoding/axth/data/schema"
 	"os"
 	"testing"
 )
@@ -34,7 +33,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestEnforcer_Register(t *testing.T) {
-	register, err := e.Register(schema.RegisterUser{
+	register, err := e.Register(RegisterUser{
 		UserID:      "test-user-1",
 		DisplayName: "test-user-1",
 		Email:       "test-user-1@test.com",

@@ -2,7 +2,6 @@ package axth
 
 import (
 	"fmt"
-	"github.com/axiangcoding/axth/data/schema"
 	errs "github.com/axiangcoding/axth/errors"
 	"github.com/axiangcoding/axth/security"
 	"gorm.io/driver/mysql"
@@ -36,7 +35,7 @@ func NewEnforcer(config *Config) (*Enforcer, error) {
 		return nil, err
 	}
 	err = db.Set("gorm:table_options",
-		"ENGINE=InnoDB CHARSET=utf8mb4 COLLATE utf8mb4_bin").AutoMigrate(&schema.AxthUser{})
+		"ENGINE=InnoDB CHARSET=utf8mb4 COLLATE utf8mb4_bin").AutoMigrate(&AxthUser{})
 	if err != nil {
 		return nil, err
 	}
@@ -59,26 +58,26 @@ func NewEnforcer(config *Config) (*Enforcer, error) {
 }
 
 // Login 使用用户ID登录，默认登录方式
-func (e *Enforcer) Login(userID string, password string) (*schema.DisplayUser, error) {
+func (e *Enforcer) Login(userID string, password string) (*DisplayUser, error) {
 	return e.loginWithKey(FieldUserId, userID, password)
 }
 
 // LoginWithEmail 使用邮箱登录
-func (e *Enforcer) LoginWithEmail(email string, password string) (*schema.DisplayUser, error) {
+func (e *Enforcer) LoginWithEmail(email string, password string) (*DisplayUser, error) {
 	return e.loginWithKey(FieldEmail, email, password)
 }
 
 // LoginWithPhone 使用手机号登录
-func (e *Enforcer) LoginWithPhone(phone string, password string) (*schema.DisplayUser, error) {
+func (e *Enforcer) LoginWithPhone(phone string, password string) (*DisplayUser, error) {
 	return e.loginWithKey(FieldPhone, phone, password)
 }
 
 // ResetPassword 重置密码
 func (e *Enforcer) ResetPassword(userID string, oldPwd string, newPwd string) (bool, error) {
-	where := schema.AxthUser{
+	where := AxthUser{
 		UserID: userID,
 	}
-	var found schema.AxthUser
+	var found AxthUser
 	err := e.Db.Where(where).Take(&found).Error
 	if err != nil {
 		return false, err
@@ -92,7 +91,7 @@ func (e *Enforcer) ResetPassword(userID string, oldPwd string, newPwd string) (b
 	if err != nil {
 		return false, err
 	}
-	err = e.Db.Model(&found).Updates(schema.AxthUser{Password: newHashPwd}).Error
+	err = e.Db.Model(&found).Updates(AxthUser{Password: newHashPwd}).Error
 	if err != nil {
 		return false, err
 	}
@@ -100,7 +99,7 @@ func (e *Enforcer) ResetPassword(userID string, oldPwd string, newPwd string) (b
 }
 
 // Register 注册一个用户
-func (e *Enforcer) Register(ru schema.RegisterUser) (bool, error) {
+func (e *Enforcer) Register(ru RegisterUser) (bool, error) {
 	user := ru.ToAxUser()
 	hashedPassword, err := security.GeneratePwd(ru.Password)
 	if err != nil {
@@ -115,9 +114,9 @@ func (e *Enforcer) Register(ru schema.RegisterUser) (bool, error) {
 }
 
 // FindUser 查找一个用户
-func (e *Enforcer) FindUser(userID string) (*schema.DisplayUser, error) {
-	where := schema.AxthUser{UserID: userID}
-	var found schema.AxthUser
+func (e *Enforcer) FindUser(userID string) (*DisplayUser, error) {
+	where := AxthUser{UserID: userID}
+	var found AxthUser
 	err := e.Db.Where(where).Take(&found).Error
 	if err != nil {
 		return nil, err
@@ -140,8 +139,8 @@ func (e *Enforcer) CheckPhoneExist(phone string) (bool, error) {
 	return e.checkValueExist(FieldPhone, phone)
 }
 
-func (e *Enforcer) loginWithKey(key string, val interface{}, password string) (*schema.DisplayUser, error) {
-	where := schema.AxthUser{}
+func (e *Enforcer) loginWithKey(key string, val interface{}, password string) (*DisplayUser, error) {
+	where := AxthUser{}
 	if key == FieldEmail {
 		where.Email = val.(string)
 	} else if key == FieldUserId {
@@ -151,7 +150,7 @@ func (e *Enforcer) loginWithKey(key string, val interface{}, password string) (*
 	} else {
 		return nil, errs.ErrInternalFailed
 	}
-	var found schema.AxthUser
+	var found AxthUser
 	err := e.Db.Where(where).Take(&found).Error
 	if err != nil {
 		return nil, errs.ErrUserNotExist
@@ -164,7 +163,7 @@ func (e *Enforcer) loginWithKey(key string, val interface{}, password string) (*
 }
 
 func (e *Enforcer) checkValueExist(key string, val interface{}) (bool, error) {
-	where := schema.AxthUser{}
+	where := AxthUser{}
 	if key == FieldEmail {
 		where.Email = val.(string)
 	} else if key == FieldUserId {

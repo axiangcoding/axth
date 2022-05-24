@@ -5,7 +5,6 @@ import (
 	"github.com/axiangcoding/axth/data/schema"
 	errs "github.com/axiangcoding/axth/errors"
 	"github.com/axiangcoding/axth/security"
-	"github.com/go-redis/redis/v8"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"time"
@@ -19,15 +18,15 @@ const (
 )
 
 type Enforcer struct {
-	Db      *gorm.DB
-	CacheDb *redis.Client
+	Db *gorm.DB
+	// CacheDb *redis.Client
 }
 
 type Config struct {
 	// Relational database dsn
 	DBDsn string
 	// Cache database dsn
-	CacheDsn string
+	// CacheDsn string
 }
 
 // NewEnforcer create a new enforcer
@@ -47,14 +46,14 @@ func NewEnforcer(config *Config) (*Enforcer, error) {
 	sqlDB.SetMaxIdleConns(10)
 	sqlDB.SetMaxOpenConns(100)
 	sqlDB.SetConnMaxLifetime(time.Hour)
-	opt, err := redis.ParseURL(config.CacheDsn)
-	if err != nil {
-		return nil, err
-	}
-	redisClient := redis.NewClient(opt)
+	// opt, err := redis.ParseURL(config.CacheDsn)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// redisClient := redis.NewClient(opt)
 	return &Enforcer{
-		Db:      db,
-		CacheDb: redisClient,
+		Db: db,
+		// CacheDb: redisClient,
 	}, nil
 }
 

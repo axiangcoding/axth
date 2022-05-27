@@ -21,7 +21,7 @@ const (
 // AxthUser For user save in database
 type AxthUser struct {
 	gorm.Model
-	UserID           string `gorm:"uniqueIndex"`
+	UserID           string `gorm:"uniqueIndex;size:255"`
 	DisplayName      string `gorm:"size:255"`
 	Email            string `gorm:"uniqueIndex;size:255"`
 	Phone            string `gorm:"uniqueIndex;size:255"`

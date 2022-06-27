@@ -1,29 +1,33 @@
 package axth
 
 import (
-	"github.com/axiangcoding/axth/data/schema"
+	"fmt"
 	"os"
 	"testing"
 )
 
-var conf = Config{
-	DBDsn: "axth:pwd@tcp(127.0.0.1:3306)/axth?charset=utf8mb4&parseTime=True&loc=Local",
-}
-
 var e *Enforcer
 
-// setup 初始化
+// setup
 func setup() {
-	enforcer, err := NewEnforcer(&conf)
+	defaultOpt, err := DefaultOptions("axth:pwd@tcp(127.0.0.1:3306)/axth?charset=utf8mb4&parseTime=True&loc=Local")
+	if err != nil {
+		panic(err)
+	}
+	enforcer, err := NewEnforcer(defaultOpt)
 	if err != nil {
 		panic(err)
 	}
 	e = enforcer
+	fmt.Printf("clean table ax_users for testing")
+	err = e.db.Unscoped().Where("1=1").Delete(&AxthUser{}).Error
+	if err != nil {
+		panic(err)
+	}
 }
 
-// teardown 退出清理
+// teardown
 func teardown() {
-
 }
 
 func TestMain(m *testing.M) {
@@ -34,7 +38,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestEnforcer_Register(t *testing.T) {
-	register, err := e.Register(schema.RegisterUser{
+	register, err := e.Register(RegisterUser{
 		UserID:      "test-user-1",
 		DisplayName: "test-user-1",
 		Email:       "test-user-1@test.com",

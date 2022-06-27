@@ -5,13 +5,13 @@ import (
 	"testing"
 )
 
-var conf = Config{
-	DBDsn: "axth:pwd@tcp(127.0.0.1:3306)/axth?charset=utf8mb4&parseTime=True&loc=Local",
+var conf = Options{
+	DbDsn: "axth:pwd@tcp(127.0.0.1:3306)/axth?charset=utf8mb4&parseTime=True&loc=Local",
 }
 
 var e *Enforcer
 
-// setup 初始化
+// setup
 func setup() {
 	enforcer, err := NewEnforcer(&conf)
 	if err != nil {
@@ -20,7 +20,7 @@ func setup() {
 	e = enforcer
 }
 
-// teardown 退出清理
+// teardown
 func teardown() {
 
 }

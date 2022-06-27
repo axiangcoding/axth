@@ -1,6 +1,7 @@
 package axth
 
 import (
+	"errors"
 	"fmt"
 	errs "github.com/axiangcoding/axth/errors"
 	"github.com/axiangcoding/axth/security"
@@ -10,28 +11,25 @@ import (
 )
 
 type Enforcer struct {
-	db *gorm.DB
-	// CacheDb *redis.Client
-}
-
-type Config struct {
-	// Relational database dsn
-	DBDsn string
-	// Cache database dsn
-	// CacheDsn string
+	db      *gorm.DB
+	options *Options
 }
 
 // NewEnforcer create a new enforcer
-func NewEnforcer(config *Config) (*Enforcer, error) {
-	db, err := gorm.Open(mysql.Open(config.DBDsn), &gorm.Config{})
+func NewEnforcer(opt *Options) (*Enforcer, error) {
+	db, err := gorm.Open(mysql.Open(opt.DbDsn), &gorm.Config{})
 	if err != nil {
 		return nil, err
 	}
-	err = db.Set("gorm:table_options",
-		"ENGINE=InnoDB CHARSET=utf8mb4 COLLATE utf8mb4_bin").AutoMigrate(&AxthUser{})
-	if err != nil {
-		return nil, err
+
+	if opt.DbAutoMigrate {
+		err = db.Set("gorm:table_options",
+			"ENGINE=InnoDB CHARSET=utf8mb4 COLLATE utf8mb4_bin").AutoMigrate(&AxthUser{})
+		if err != nil {
+			return nil, err
+		}
 	}
+
 	sqlDB, err := db.DB()
 	if err != nil {
 		return nil, err
@@ -39,36 +37,37 @@ func NewEnforcer(config *Config) (*Enforcer, error) {
 	sqlDB.SetMaxIdleConns(10)
 	sqlDB.SetMaxOpenConns(100)
 	sqlDB.SetConnMaxLifetime(time.Hour)
-	// opt, err := redis.ParseURL(config.CacheDsn)
+	// opt, err := redis.ParseURL(opt.CacheDsn)
 	// if err != nil {
 	// 	return nil, err
 	// }
 	// redisClient := redis.NewClient(opt)
 	return &Enforcer{
-		db: db,
+		db:      db,
+		options: opt,
 		// CacheDb: redisClient,
 	}, nil
 }
 
-// Login 使用用户ID登录，默认登录方式
-func (e *Enforcer) Login(userID string, password string) (*DisplayUser, error) {
-	return e.loginWithKey(FieldUserId, userID, password)
+// Login user login with userId and password, default login method
+func (e *Enforcer) Login(userId string, password string) (*DisplayUser, error) {
+	return e.loginWithKey(FieldUserId, userId, password)
 }
 
-// LoginWithEmail 使用邮箱登录
+// LoginWithEmail user login with email
 func (e *Enforcer) LoginWithEmail(email string, password string) (*DisplayUser, error) {
 	return e.loginWithKey(FieldEmail, email, password)
 }
 
-// LoginWithPhone 使用手机号登录
+// LoginWithPhone user login with phone
 func (e *Enforcer) LoginWithPhone(phone string, password string) (*DisplayUser, error) {
 	return e.loginWithKey(FieldPhone, phone, password)
 }
 
-// ResetPassword 重置密码
-func (e *Enforcer) ResetPassword(userID string, oldPwd string, newPwd string) (bool, error) {
+// ResetPassword reset account password
+func (e *Enforcer) ResetPassword(userId string, oldPwd string, newPwd string) (bool, error) {
 	where := AxthUser{
-		UserID: userID,
+		UserID: userId,
 	}
 	var found AxthUser
 	err := e.db.Where(where).Take(&found).Error
@@ -91,7 +90,7 @@ func (e *Enforcer) ResetPassword(userID string, oldPwd string, newPwd string) (b
 	return true, nil
 }
 
-// Register 注册一个用户
+// Register register a user
 func (e *Enforcer) Register(ru RegisterUser) (bool, error) {
 	user := ru.ToAxUser()
 	hashedPassword, err := security.GeneratePwd(ru.Password)
@@ -106,9 +105,9 @@ func (e *Enforcer) Register(ru RegisterUser) (bool, error) {
 	return true, nil
 }
 
-// FindUser 查找一个用户
-func (e *Enforcer) FindUser(userID string) (*DisplayUser, error) {
-	where := AxthUser{UserID: userID}
+// FindUser find a user
+func (e *Enforcer) FindUser(userId string) (*DisplayUser, error) {
+	where := AxthUser{UserID: userId}
 	var found AxthUser
 	err := e.db.Where(where).Take(&found).Error
 	if err != nil {
@@ -117,17 +116,31 @@ func (e *Enforcer) FindUser(userID string) (*DisplayUser, error) {
 	return found.ToDisplayUser(), nil
 }
 
-// CheckUserIdExist 检查用户ID是否存在
+// UpdateUser update user by userId
+func (e *Enforcer) UpdateUser(userId string, user AxthUser) (bool, error) {
+	where := AxthUser{UserID: userId}
+	result := e.db.Model(&where).Updates(user)
+	err := result.Error
+	if err != nil {
+		return false, err
+	}
+	if result.RowsAffected != 1 {
+		return false, errors.New("nothing is updated")
+	}
+	return true, nil
+}
+
+// CheckUserIdExist check if userId already exist
 func (e *Enforcer) CheckUserIdExist(userId string) (bool, error) {
 	return e.checkValueExist(FieldUserId, userId)
 }
 
-// CheckEmailExist 检查邮箱是否存在
+// CheckEmailExist check if email already exist
 func (e *Enforcer) CheckEmailExist(email string) (bool, error) {
 	return e.checkValueExist(FieldEmail, email)
 }
 
-// CheckPhoneExist 检查手机号是否存在
+// CheckPhoneExist check if phone already exist
 func (e *Enforcer) CheckPhoneExist(phone string) (bool, error) {
 	return e.checkValueExist(FieldPhone, phone)
 }

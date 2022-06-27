@@ -6,8 +6,9 @@ import (
 )
 
 const (
+	// AxUserStatusNormal user status is normal
 	AxUserStatusNormal = "normal"
-	// AxUserStatusBanned 封禁状态
+	// AxUserStatusBanned user status is banned
 	AxUserStatusBanned = "banned"
 )
 
@@ -18,11 +19,12 @@ const (
 	FieldUserId = "userId"
 )
 
-// AxthUser For user save in database
+// AxthUser user schema
 type AxthUser struct {
 	gorm.Model
 	UserID           string `gorm:"uniqueIndex;size:255"`
 	DisplayName      string `gorm:"size:255"`
+	AvatarUrl        string `gorm:"size:255"`
 	Email            string `gorm:"uniqueIndex;size:255"`
 	Phone            string `gorm:"uniqueIndex;size:255"`
 	Password         string `gorm:"size:255"`
@@ -36,6 +38,7 @@ func (r AxthUser) ToDisplayUser() *DisplayUser {
 		ID:               r.ID,
 		UserID:           r.UserID,
 		DisplayName:      r.DisplayName,
+		AvatarUrl:        r.AvatarUrl,
 		Email:            r.Email,
 		Phone:            r.Phone,
 		Status:           r.Status,
@@ -49,13 +52,14 @@ func (r AxthUser) ToDisplayUser() *DisplayUser {
 
 // DisplayUser For user display
 type DisplayUser struct {
-	ID               uint      `json:"id,omitempty"`
-	UserID           string    `json:"user_id,omitempty"`
-	DisplayName      string    `json:"display_name,omitempty"`
-	Email            string    `json:"email,omitempty"`
-	Phone            string    `json:"phone,omitempty"`
-	Status           string    `json:"status,omitempty"`
-	LoginFailedCount int       `json:"login_failed_count,omitempty"`
+	ID               uint      `json:"id"`
+	UserID           string    `json:"user_id"`
+	DisplayName      string    `json:"display_name"`
+	AvatarUrl        string    `json:"avatar_url"`
+	Email            string    `json:"email"`
+	Phone            string    `json:"phone"`
+	Status           string    `json:"status"`
+	LoginFailedCount int       `json:"login_failed_count"`
 	CreatedAt        time.Time `json:"created_at"`
 	UpdatedAt        time.Time `json:"updated_at"`
 	LastLoginTime    time.Time `json:"last_login_time"`
@@ -65,6 +69,7 @@ type DisplayUser struct {
 type RegisterUser struct {
 	UserID      string `json:"user_id,omitempty"`
 	DisplayName string `json:"display_name,omitempty"`
+	AvatarUrl   string `json:"avatar_url,omitempty"`
 	Email       string `json:"email,omitempty"`
 	Phone       string `json:"phone,omitempty"`
 	Password    string `json:"password,omitempty"`

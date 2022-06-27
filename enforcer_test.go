@@ -1,28 +1,33 @@
 package axth
 
 import (
+	"fmt"
 	"os"
 	"testing"
 )
-
-var conf = Options{
-	DbDsn: "axth:pwd@tcp(127.0.0.1:3306)/axth?charset=utf8mb4&parseTime=True&loc=Local",
-}
 
 var e *Enforcer
 
 // setup
 func setup() {
-	enforcer, err := NewEnforcer(&conf)
+	defaultOpt, err := DefaultOptions("axth:pwd@tcp(127.0.0.1:3306)/axth?charset=utf8mb4&parseTime=True&loc=Local")
+	if err != nil {
+		panic(err)
+	}
+	enforcer, err := NewEnforcer(defaultOpt)
 	if err != nil {
 		panic(err)
 	}
 	e = enforcer
+	fmt.Printf("clean table ax_users for testing")
+	err = e.db.Unscoped().Where("1=1").Delete(&AxthUser{}).Error
+	if err != nil {
+		panic(err)
+	}
 }
 
 // teardown
 func teardown() {
-
 }
 
 func TestMain(m *testing.M) {

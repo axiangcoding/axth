@@ -23,6 +23,23 @@ type Options struct {
 	UserLoginFailedUnlockDuration time.Duration
 }
 
+func DefaultOptions(dbDsn string) (*Options, error) {
+	options := Options{
+		DbDsn:                         dbDsn,
+		DbAutoMigrate:                 true,
+		DbMaxIdleConns:                10,
+		DbMaxOpenConns:                100,
+		DbConnMaxLifeTime:             time.Hour,
+		UserMaxLoginFailed:            3,
+		UserLoginFailedUnlockDuration: time.Minute * 5,
+	}
+	err := CheckOptions(options)
+	if err != nil {
+		return nil, err
+	}
+	return &options, nil
+}
+
 func CheckOptions(opt Options) error {
 	validate := validator.New()
 	err := validate.Struct(&opt)

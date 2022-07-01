@@ -9,12 +9,6 @@ import (
 type Options struct {
 	// auto migrate inner table
 	DbAutoMigrate bool
-	// db max idle connections
-	DbMaxIdleConns int `validate:"gte=0,lte=100"`
-	// db max open connections
-	DbMaxOpenConns int `validate:"gte=0,lte=100"`
-	// db connection max lifetime
-	DbConnMaxLifeTime time.Duration
 	// user max login failed times
 	UserMaxLoginFailed int `validate:"gte=0"`
 	// if user reach max login failed, wait for duration to unlock
@@ -24,9 +18,6 @@ type Options struct {
 func DefaultOptions() (*Options, error) {
 	options := Options{
 		DbAutoMigrate:                 true,
-		DbMaxIdleConns:                10,
-		DbMaxOpenConns:                100,
-		DbConnMaxLifeTime:             time.Hour,
 		UserMaxLoginFailed:            3,
 		UserLoginFailedUnlockDuration: time.Minute * 5,
 	}

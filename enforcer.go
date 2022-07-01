@@ -2,11 +2,11 @@ package axth
 
 import (
 	"errors"
-	"fmt"
 	errs "github.com/axiangcoding/axth/errors"
 	"github.com/axiangcoding/axth/security"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/schema"
 	"time"
 )
 
@@ -17,7 +17,8 @@ type Enforcer struct {
 
 // NewEnforcer create a new enforcer
 func NewEnforcer(opt *Options) (*Enforcer, error) {
-	db, err := gorm.Open(mysql.Open(opt.DbDsn), &gorm.Config{})
+	db, err := gorm.Open(mysql.Open(opt.DbDsn), &gorm.Config{
+		NamingStrategy: &schema.NamingStrategy{SingularTable: true}})
 	if err != nil {
 		return nil, err
 	}

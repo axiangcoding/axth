@@ -1,7 +1,6 @@
 package axth
 
 import (
-	"fmt"
 	"os"
 	"testing"
 )
@@ -19,9 +18,7 @@ func setup() {
 		panic(err)
 	}
 	e = enforcer
-	fmt.Printf("clean table ax_users for testing")
-	err = e.db.Unscoped().Where("1=1").Delete(&AxthUser{}).Error
-	if err != nil {
+	if err := e.db.Unscoped().Where("1=1").Delete(&AxthUser{}).Error; err != nil {
 		panic(err)
 	}
 }

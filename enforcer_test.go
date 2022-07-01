@@ -13,7 +13,8 @@ var e *Enforcer
 
 // setup
 func setup() {
-	db, err := gorm.Open(mysql.Open("root:example@tcp(10.103.4.237:3306)/axth?charset=utf8mb4&parseTime=True&loc=Local"), &gorm.Config{
+	dsn := "axth:pwd@tcp(127.0.0.1:3306)/axth?charset=utf8mb4&parseTime=True&loc=Local"
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
 		NamingStrategy: &schema.NamingStrategy{SingularTable: true}})
 	sqlDB, err := db.DB()
 	if err != nil {

@@ -4,10 +4,7 @@ import (
 	"errors"
 	errs "github.com/axiangcoding/axth/errors"
 	"github.com/axiangcoding/axth/security"
-	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"gorm.io/gorm/schema"
-	"time"
 )
 
 type Enforcer struct {
@@ -16,37 +13,17 @@ type Enforcer struct {
 }
 
 // NewEnforcer create a new enforcer
-func NewEnforcer(opt *Options) (*Enforcer, error) {
-	db, err := gorm.Open(mysql.Open(opt.DbDsn), &gorm.Config{
-		NamingStrategy: &schema.NamingStrategy{SingularTable: true}})
-	if err != nil {
-		return nil, err
-	}
-
+func NewEnforcer(db *gorm.DB, opt *Options) (*Enforcer, error) {
 	if opt.DbAutoMigrate {
-		err = db.Set("gorm:table_options",
+		err := db.Set("gorm:table_options",
 			"ENGINE=InnoDB CHARSET=utf8mb4 COLLATE utf8mb4_bin").AutoMigrate(&AxthUser{})
 		if err != nil {
 			return nil, err
 		}
 	}
-
-	sqlDB, err := db.DB()
-	if err != nil {
-		return nil, err
-	}
-	sqlDB.SetMaxIdleConns(10)
-	sqlDB.SetMaxOpenConns(100)
-	sqlDB.SetConnMaxLifetime(time.Hour)
-	// opt, err := redis.ParseURL(opt.CacheDsn)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// redisClient := redis.NewClient(opt)
 	return &Enforcer{
 		db:      db,
 		options: opt,
-		// CacheDb: redisClient,
 	}, nil
 }
 

@@ -1,19 +1,35 @@
 package axth
 
 import (
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
+	"gorm.io/gorm/schema"
 	"os"
 	"testing"
+	"time"
 )
 
 var e *Enforcer
 
 // setup
 func setup() {
-	defaultOpt, err := DefaultOptions("axth:pwd@tcp(127.0.0.1:3306)/axth?charset=utf8mb4&parseTime=True&loc=Local")
+	db, err := gorm.Open(mysql.Open("root:example@tcp(10.103.4.237:3306)/axth?charset=utf8mb4&parseTime=True&loc=Local"), &gorm.Config{
+		NamingStrategy: &schema.NamingStrategy{SingularTable: true}})
+	sqlDB, err := db.DB()
 	if err != nil {
 		panic(err)
 	}
-	enforcer, err := NewEnforcer(defaultOpt)
+	sqlDB.SetMaxIdleConns(10)
+	sqlDB.SetMaxOpenConns(100)
+	sqlDB.SetConnMaxLifetime(time.Hour)
+	if err != nil {
+		panic(err)
+	}
+	defaultOpt, err := DefaultOptions()
+	if err != nil {
+		panic(err)
+	}
+	enforcer, err := NewEnforcer(db, defaultOpt)
 	if err != nil {
 		panic(err)
 	}

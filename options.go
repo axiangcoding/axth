@@ -7,8 +7,6 @@ import (
 )
 
 type Options struct {
-	// Relational database dsn
-	DbDsn string `validate:"required"`
 	// auto migrate inner table
 	DbAutoMigrate bool
 	// db max idle connections
@@ -23,9 +21,8 @@ type Options struct {
 	UserLoginFailedUnlockDuration time.Duration
 }
 
-func DefaultOptions(dbDsn string) (*Options, error) {
+func DefaultOptions() (*Options, error) {
 	options := Options{
-		DbDsn:                         dbDsn,
 		DbAutoMigrate:                 true,
 		DbMaxIdleConns:                10,
 		DbMaxOpenConns:                100,

@@ -2,12 +2,9 @@ package axth
 
 import (
 	"errors"
-	"fmt"
 	errs "github.com/axiangcoding/axth/errors"
 	"github.com/axiangcoding/axth/security"
-	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"time"
 )
 
 type Enforcer struct {
@@ -16,36 +13,17 @@ type Enforcer struct {
 }
 
 // NewEnforcer create a new enforcer
-func NewEnforcer(opt *Options) (*Enforcer, error) {
-	db, err := gorm.Open(mysql.Open(opt.DbDsn), &gorm.Config{})
-	if err != nil {
-		return nil, err
-	}
-
+func NewEnforcer(db *gorm.DB, opt *Options) (*Enforcer, error) {
 	if opt.DbAutoMigrate {
-		err = db.Set("gorm:table_options",
+		err := db.Set("gorm:table_options",
 			"ENGINE=InnoDB CHARSET=utf8mb4 COLLATE utf8mb4_bin").AutoMigrate(&AxthUser{})
 		if err != nil {
 			return nil, err
 		}
 	}
-
-	sqlDB, err := db.DB()
-	if err != nil {
-		return nil, err
-	}
-	sqlDB.SetMaxIdleConns(10)
-	sqlDB.SetMaxOpenConns(100)
-	sqlDB.SetConnMaxLifetime(time.Hour)
-	// opt, err := redis.ParseURL(opt.CacheDsn)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// redisClient := redis.NewClient(opt)
 	return &Enforcer{
 		db:      db,
 		options: opt,
-		// CacheDb: redisClient,
 	}, nil
 }
 
@@ -70,21 +48,17 @@ func (e *Enforcer) ResetPassword(userId string, oldPwd string, newPwd string) (b
 		UserID: userId,
 	}
 	var found AxthUser
-	err := e.db.Where(where).Take(&found).Error
-	if err != nil {
+	if err := e.db.Where(where).Take(&found).Error; err != nil {
 		return false, err
 	}
-	err = security.ComparePwd(found.Password, oldPwd)
-	if err != nil {
-		fmt.Println(err)
+	if err := security.ComparePwd(found.Password, oldPwd); err != nil {
 		return false, err
 	}
 	newHashPwd, err := security.GeneratePwd(newPwd)
 	if err != nil {
 		return false, err
 	}
-	err = e.db.Model(&found).Updates(AxthUser{Password: newHashPwd}).Error
-	if err != nil {
+	if err := e.db.Model(&found).Updates(AxthUser{Password: newHashPwd}).Error; err != nil {
 		return false, err
 	}
 	return true, nil
@@ -98,8 +72,7 @@ func (e *Enforcer) Register(ru RegisterUser) (bool, error) {
 		return false, err
 	}
 	user.Password = hashedPassword
-	err = e.db.Save(user).Error
-	if err != nil {
+	if err := e.db.Save(user).Error; err != nil {
 		return false, err
 	}
 	return true, nil
@@ -109,8 +82,7 @@ func (e *Enforcer) Register(ru RegisterUser) (bool, error) {
 func (e *Enforcer) FindUser(userId string) (*DisplayUser, error) {
 	where := AxthUser{UserID: userId}
 	var found AxthUser
-	err := e.db.Where(where).Take(&found).Error
-	if err != nil {
+	if err := e.db.Where(where).Take(&found).Error; err != nil {
 		return nil, err
 	}
 	return found.ToDisplayUser(), nil
@@ -119,13 +91,12 @@ func (e *Enforcer) FindUser(userId string) (*DisplayUser, error) {
 // UpdateUser update user by userId
 func (e *Enforcer) UpdateUser(userId string, user AxthUser) (bool, error) {
 	where := AxthUser{UserID: userId}
-	result := e.db.Model(&where).Updates(user)
-	err := result.Error
-	if err != nil {
-		return false, err
-	}
-	if result.RowsAffected != 1 {
-		return false, errors.New("nothing is updated")
+	if result := e.db.Model(&where).Updates(user); result.Error != nil {
+		return false, result.Error
+	} else {
+		if result.RowsAffected != 1 {
+			return false, errors.New("nothing is updated")
+		}
 	}
 	return true, nil
 }
@@ -157,11 +128,14 @@ func (e *Enforcer) loginWithKey(key string, val interface{}, password string) (*
 		return nil, errs.ErrInternalFailed
 	}
 	var found AxthUser
-	err := e.db.Where(where).Take(&found).Error
-	if err != nil {
-		return nil, errs.ErrUserNotExist
+	if err := e.db.Where(where).Take(&found).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errs.ErrUserNotExist
+		} else {
+			return nil, err
+		}
 	}
-	err = security.ComparePwd(found.Password, password)
+	err := security.ComparePwd(found.Password, password)
 	if err != nil {
 		return nil, errs.ErrUserPasswordNotMatched
 	}

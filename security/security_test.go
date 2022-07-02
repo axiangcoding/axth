@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-var examples = []struct {
+var tests = []struct {
 	plainPwd string
 	hashPwd  string
 }{
@@ -18,9 +18,9 @@ var examples = []struct {
 }
 
 func TestGeneratePwd(t *testing.T) {
-	for i, example := range examples {
+	for i, tt := range tests {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			_, err := GeneratePwd(example.plainPwd)
+			_, err := GeneratePwd(tt.plainPwd)
 			if err != nil {
 				t.Error(err)
 			}
@@ -29,7 +29,7 @@ func TestGeneratePwd(t *testing.T) {
 }
 
 func TestComparePwd(t *testing.T) {
-	for i, example := range examples {
+	for i, example := range tests {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			err := ComparePwd(example.hashPwd, example.plainPwd)
 			if err != nil {

@@ -5,11 +5,78 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
 	"os"
+	"strconv"
 	"testing"
 	"time"
 )
 
 var e *Enforcer
+
+var tests = []struct {
+	registerUser RegisterUser
+}{
+	{registerUser: RegisterUser{
+		UserID:      "dbbc4ba3-c5bb-f559-4c55-dd884c58fb41",
+		DisplayName: "test-registerUser-1",
+		Email:       "test-registerUser-1@test.com",
+		Phone:       "15000000001",
+		Password:    "abc",
+	}},
+	{registerUser: RegisterUser{
+		UserID:      "27d86f82-e0a2-d299-c1b3-04ccbd6f0398",
+		DisplayName: "test-registerUser-2",
+		Email:       "test-registerUser-2@test.com",
+		Phone:       "17800000001",
+		Password:    "A.bc1234",
+	}},
+	{registerUser: RegisterUser{
+		UserID:      "d3f0c8ac-04f0-a7a0-8ee8-5c0da9e5bb1c",
+		DisplayName: "test-registerUser-3",
+		Email:       "test-registerUser-3@test.com",
+		Phone:       "18800000001",
+		Password:    "I'mP@ssword.",
+	}},
+}
+
+func TestEnforcer_Register(t *testing.T) {
+	for i, tt := range tests {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			register, err := e.Register(tt.registerUser)
+			if err != nil {
+				t.Error()
+			}
+			if !register {
+				t.Fail()
+			}
+		})
+	}
+}
+
+func TestEnforcer_Login(t *testing.T) {
+	for i, tt := range tests {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			_, err := e.LoginWithEmail(tt.registerUser.Email, tt.registerUser.Password)
+			if err != nil {
+				t.Fail()
+			}
+		})
+	}
+}
+
+func TestEnforcer_ResetPassword(t *testing.T) {
+	_, err := e.ResetPassword("dbbc4ba3-c5bb-f559-4c55-dd884c58fb41", "abc", "newPwd")
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestEnforcer_FindUser(t *testing.T) {
+	user, err := e.FindUser("dbbc4ba3-c5bb-f559-4c55-dd884c58fb41")
+	if err != nil {
+		t.Error(err)
+	}
+	t.Log(user)
+}
 
 // setup
 func setup() {
@@ -49,42 +116,4 @@ func TestMain(m *testing.M) {
 	code := m.Run()
 	teardown()
 	os.Exit(code)
-}
-
-func TestEnforcer_Register(t *testing.T) {
-	register, err := e.Register(RegisterUser{
-		UserID:      "test-user-1",
-		DisplayName: "test-user-1",
-		Email:       "test-user-1@test.com",
-		Phone:       "+8600000000001",
-		Password:    "abc",
-	})
-	if err != nil {
-		t.Error(err)
-	}
-	if !register {
-		t.Fail()
-	}
-}
-
-func TestEnforcer_Login(t *testing.T) {
-	_, err := e.LoginWithEmail("test-user-1@test.com", "abc")
-	if err != nil {
-		t.Error(err)
-	}
-}
-
-func TestEnforcer_ResetPassword(t *testing.T) {
-	_, err := e.ResetPassword("test-user-1", "abc", "newPwd")
-	if err != nil {
-		t.Error(err)
-	}
-}
-
-func TestEnforcer_FindUser(t *testing.T) {
-	user, err := e.FindUser("test-user-1")
-	if err != nil {
-		t.Error(err)
-	}
-	t.Log(user)
 }

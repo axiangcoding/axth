@@ -6,10 +6,10 @@ import (
 )
 
 const (
-	// AxUserStatusNormal user status is normal
-	AxUserStatusNormal = "normal"
-	// AxUserStatusBanned user status is banned
-	AxUserStatusBanned = "banned"
+	// UserStatusNormal user status is normal
+	UserStatusNormal = "normal"
+	// UserStatusBanned user status is banned
+	UserStatusBanned = "banned"
 )
 
 const (
@@ -82,7 +82,7 @@ func (u RegisterUser) ToAxUser() *AxthUser {
 		Email:            u.Email,
 		Phone:            u.Phone,
 		Password:         u.Password,
-		Status:           AxUserStatusNormal,
+		Status:           UserStatusNormal,
 		LoginFailedCount: 0,
 		LastLoginTime:    time.Now(),
 	}

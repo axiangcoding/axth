@@ -19,7 +19,7 @@ var examples = []struct {
 		DisplayName:      "user_display_name_1",
 		Email:            "email1@test.com",
 		Phone:            "+86112345678900",
-		Status:           AxUserStatusNormal,
+		Status:           UserStatusNormal,
 		LoginFailedCount: 0,
 	}, DisplayUser{
 		ID:               1,
@@ -27,7 +27,7 @@ var examples = []struct {
 		DisplayName:      "user_display_name_1",
 		Email:            "email1@test.com",
 		Phone:            "+86112345678900",
-		Status:           AxUserStatusNormal,
+		Status:           UserStatusNormal,
 		LoginFailedCount: 0,
 	}},
 	{AxthUser{
@@ -38,7 +38,7 @@ var examples = []struct {
 		DisplayName:      "user_display_name_2",
 		Email:            "email-2@test.com",
 		Phone:            "+86112345678900",
-		Status:           AxUserStatusBanned,
+		Status:           UserStatusBanned,
 		LoginFailedCount: 0,
 	}, DisplayUser{
 		ID:               2,
@@ -46,7 +46,7 @@ var examples = []struct {
 		DisplayName:      "user_display_name_2",
 		Email:            "email-2@test.com",
 		Phone:            "+86112345678900",
-		Status:           AxUserStatusBanned,
+		Status:           UserStatusBanned,
 		LoginFailedCount: 0,
 	}},
 	{},

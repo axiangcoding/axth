@@ -1,6 +1,7 @@
 package axth
 
 import (
+	"errors"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -65,8 +66,17 @@ func TestEnforcer_Login(t *testing.T) {
 			if _, err := e.LoginWithPhone(tt.user.Phone, tt.user.Password); err != nil {
 				t.Fail()
 			}
+			// user not exist case
+			if _, err := e.Login(tt.user.UserID+"random", tt.user.Password); err == nil || !errors.Is(err, ErrUserNotExist) {
+				t.Fail()
+			}
+			// user password not matched case
+			if _, err := e.Login(tt.user.UserID, tt.user.Password+"random"); err == nil || !errors.Is(err, ErrUserPasswordNotMatched) {
+				t.Fail()
+			}
 		})
 	}
+
 }
 
 func TestEnforcer_ResetPassword(t *testing.T) {
@@ -95,6 +105,44 @@ func TestEnforcer_FindUser(t *testing.T) {
 			assert.Equal(t, tt.user.DisplayName, user.DisplayName)
 			assert.Equal(t, tt.user.Email, user.Email)
 			assert.Equal(t, tt.user.AvatarUrl, user.AvatarUrl)
+		})
+	}
+}
+
+func TestEnforcer_UpdateUser(t *testing.T) {
+	for i, tt := range tests {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			avatarUrl := "http://localhost/avatar/1.png"
+			if updated, err := e.UpdateUser(tt.user.UserID, AxthUser{
+				Status:    UserStatusBanned,
+				AvatarUrl: avatarUrl,
+			}); err != nil || !updated {
+				t.Fail()
+			}
+			user, err := e.FindUser(tt.user.UserID)
+			if err != nil {
+				t.Fail()
+			}
+			assert.Equal(t, UserStatusBanned, user.Status)
+			assert.Equal(t, avatarUrl, user.AvatarUrl)
+		})
+	}
+}
+
+func TestEnforcer_CheckExist(t *testing.T) {
+	for i, tt := range tests {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			if exist, err := e.CheckUserIdExist(tt.user.UserID); err != nil || !exist {
+				t.Fail()
+			}
+
+			if exist, err := e.CheckPhoneExist(tt.user.Phone); err != nil || !exist {
+				t.Fail()
+			}
+
+			if exist, err := e.CheckEmailExist(tt.user.Email); err != nil || !exist {
+				t.Fail()
+			}
 		})
 	}
 }

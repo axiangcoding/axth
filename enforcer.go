@@ -2,7 +2,6 @@ package axth
 
 import (
 	"errors"
-	errs "github.com/axiangcoding/axth/errors"
 	"github.com/axiangcoding/axth/security"
 	"gorm.io/gorm"
 )
@@ -83,6 +82,9 @@ func (e *Enforcer) FindUser(userId string) (*DisplayUser, error) {
 	where := AxthUser{UserID: userId}
 	var found AxthUser
 	if err := e.db.Where(where).Take(&found).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrUserNotExist
+		}
 		return nil, err
 	}
 	return found.ToDisplayUser(), nil
@@ -90,12 +92,11 @@ func (e *Enforcer) FindUser(userId string) (*DisplayUser, error) {
 
 // UpdateUser update user by userId
 func (e *Enforcer) UpdateUser(userId string, user AxthUser) (bool, error) {
-	where := AxthUser{UserID: userId}
-	if result := e.db.Model(&where).Updates(user); result.Error != nil {
+	if result := e.db.Where(&AxthUser{UserID: userId}).Updates(user); result.Error != nil {
 		return false, result.Error
 	} else {
 		if result.RowsAffected != 1 {
-			return false, errors.New("nothing is updated")
+			return false, ErrUserUpdateFailed
 		}
 	}
 	return true, nil
@@ -124,20 +125,18 @@ func (e *Enforcer) loginWithKey(key string, val interface{}, password string) (*
 		where.UserID = val.(string)
 	} else if key == FieldPhone {
 		where.Phone = val.(string)
-	} else {
-		return nil, errs.ErrInternalFailed
 	}
 	var found AxthUser
 	if err := e.db.Where(where).Take(&found).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errs.ErrUserNotExist
+			return nil, ErrUserNotExist
 		} else {
 			return nil, err
 		}
 	}
 	err := security.ComparePwd(found.Password, password)
 	if err != nil {
-		return nil, errs.ErrUserPasswordNotMatched
+		return nil, ErrUserPasswordNotMatched
 	}
 	return found.ToDisplayUser(), nil
 }
@@ -151,7 +150,7 @@ func (e *Enforcer) checkValueExist(key string, val interface{}) (bool, error) {
 	} else if key == FieldPhone {
 		where.Phone = val.(string)
 	} else {
-		return false, errs.ErrInternalFailed
+		return false, ErrInternalFailed
 	}
 	var count int64
 	err := e.db.Model(&where).Where(where).Count(&count).Error

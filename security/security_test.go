@@ -22,7 +22,7 @@ func TestGeneratePwd(t *testing.T) {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			_, err := GeneratePwd(tt.plainPwd)
 			if err != nil {
-				t.Error(err)
+				t.Fail()
 			}
 		})
 	}
@@ -33,7 +33,7 @@ func TestComparePwd(t *testing.T) {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			err := ComparePwd(example.hashPwd, example.plainPwd)
 			if err != nil {
-				t.Error(err)
+				t.Fail()
 			}
 		})
 	}

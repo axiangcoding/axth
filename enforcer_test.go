@@ -130,7 +130,21 @@ func TestEnforcer_UpdateUser(t *testing.T) {
 }
 
 func TestEnforcer_CheckExist(t *testing.T) {
+	for i, tt := range tests {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			if exist, err := e.CheckUserIdExist(tt.user.UserID); err != nil || !exist {
+				t.Fail()
+			}
 
+			if exist, err := e.CheckPhoneExist(tt.user.Phone); err != nil || !exist {
+				t.Fail()
+			}
+
+			if exist, err := e.CheckEmailExist(tt.user.Email); err != nil || !exist {
+				t.Fail()
+			}
+		})
+	}
 }
 
 // setup

@@ -2,7 +2,7 @@ name: Test
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, develop ]
   pull_request:
     branches: [ master ]
 
@@ -31,5 +31,9 @@ jobs:
           go-version: 1.18
 
       - name: Test all testcase
-        run: go test -v ./...
+        run: go test -v  -cover -coverprofile=coverage.xml ./...
+
+      - name: Generate coverage reports
+        uses: codecov/codecov-action@v3
+
     # build-job: 打标签

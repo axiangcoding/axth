@@ -14,8 +14,7 @@ type Enforcer struct {
 // NewEnforcer create a new enforcer
 func NewEnforcer(db *gorm.DB, opt *Options) (*Enforcer, error) {
 	if opt.DbAutoMigrate {
-		err := db.Set("gorm:table_options",
-			"ENGINE=InnoDB CHARSET=utf8mb4 COLLATE utf8mb4_bin").AutoMigrate(&AxthUser{})
+		err := db.AutoMigrate(&AxthUser{})
 		if err != nil {
 			return nil, err
 		}
